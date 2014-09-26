@@ -53,12 +53,13 @@ class Reader(object):
             raise DeviceException('Could not set configuration: %s' % str(e))
 
         self._endpoint = self._device[0][(0, 0)][0]
+        self.keep_reading = True
 
     def read(self):
         data = []
         data_read = False
 
-        while True:
+        while self.keep_reading:
             try:
                 data += self._endpoint.read(self._endpoint.wMaxPacketSize)
                 data_read = True
@@ -91,6 +92,7 @@ class Reader(object):
         return ''.join(map(mapping.raw_to_key, extracted_data))
 
     def disconnect(self):
+        self.keep_reading = False
         if self.should_reset:
             self._device.reset()
         usb.util.release_interface(self._device, self.interface)
